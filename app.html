@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AEROVISTA - 3D Aircraft Component Explorer</title>
+  
+  <!-- Three.js Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <!-- GSAP Library for Smooth Camera Transitions -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: #0b192c; color: #ffffff; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+
+    /* Header Navbar */
+    header { display: flex; justify-content: space-between; align-items: center; padding: 15px 40px; background: #06101e; border-bottom: 1px solid #1e2d42; z-index: 10; }
+    .logo { font-size: 22px; font-weight: bold; color: #00d2ff; letter-spacing: 2px; }
+    nav a { color: #a0aec0; text-decoration: none; margin-left: 20px; transition: color 0.3s; }
+    nav a:hover, nav a.active { color: #00d2ff; }
+
+    /* Layout */
+    .main-container { display: flex; flex: 1; position: relative; width: 100%; height: calc(100vh - 60px); }
+
+    /* Viewport Area */
+    #canvas-container { flex: 2; height: 100%; position: relative; background: radial-gradient(circle, #102a45 0%, #0b192c 100%); }
+
+    /* Floating Zoom Controls */
+    .zoom-controls { position: absolute; top: 20px; left: 20px; display: flex; flex-direction: column; gap: 10px; z-index: 5; }
+    .btn-ctrl { width: 40px; height: 40px; border-radius: 50%; background: #1e3a5f; color: #fff; border: 1px solid #00d2ff; font-size: 18px; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: all 0.2s; }
+    .btn-ctrl:hover { background: #00d2ff; color: #000; box-shadow: 0 0 10px #00d2ff; }
+
+    /* Sidebar Details Panel */
+    .info-panel { width: 360px; background: rgba(15, 34, 61, 0.95); border-left: 1px solid #1e3a5f; padding: 30px; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; backdrop-filter: blur(10px); }
+    .panel-header { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; }
+    .icon-box { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #00d2ff; display: flex; justify-content: center; align-items: center; font-size: 20px; }
+    .panel-title { font-size: 22px; color: #fff; }
+    .panel-description { color: #a0aec0; line-height: 1.6; font-size: 15px; }
+
+    /* Component Selection Bottom Bar */
+    .component-selector { position: absolute; bottom: 20px; left: 20px; right: 380px; display: flex; gap: 12px; overflow-x: auto; z-index: 5; padding-bottom: 5px; }
+    .chip { background: #162a45; border: 1px solid #1e3a5f; border-radius: 6px; padding: 12px 20px; cursor: pointer; white-space: nowrap; font-size: 13px; font-weight: bold; letter-spacing: 1px; transition: all 0.3s; }
+    .chip:hover, .chip.active { border-color: #00d2ff; background: #1e3a5f; color: #00d2ff; transform: translateY(-2px); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">✈ AEROVISTA 3D</div>
+    <nav>
+      <a href="#" class="active">Home</a>
+      <a href="#">Explore</a>
+      <a href="#">Learn</a>
+    </nav>
+  </header>
+
+  <div class="main-container">
+    <div id="canvas-container">
+      <div class="zoom-controls">
+        <button class="btn-ctrl" onclick="resetCamera()" title="Reset View">↺</button>
+        <button class="btn-ctrl" onclick="zoom(0.8)" title="Zoom In">+</button>
+        <button class="btn-ctrl" onclick="zoom(1.2)" title="Zoom Out">−</button>
+      </div>
+
+      <div class="component-selector">
+        <div class="chip" id="chip-engine" onclick="focusComponent('engine')">⚙ ENGINE</div>
+        <div class="chip" id="chip-wing" onclick="focusComponent('wing')">🛩 WINGS</div>
+        <div class="chip" id="chip-cockpit" onclick="focusComponent('cockpit')">🪟 COCKPIT</div>
+        <div class="chip" id="chip-fuselage" onclick="focusComponent('landing')">🚀 Landing Gear</div>
+        <div class="chip" id="chip-tail" onclick="focusComponent('tail')">🚀 Tail</div>
+      </div>
+    </div>
+
+    <div class="info-panel">
+      <div>
+        <div class="panel-header">
+          <div class="icon-box" id="infoIcon">✈</div>
+          <h2 class="panel-title" id="infoTitle">Aircraft Explorer</h2>
+        </div>
+        <p class="panel-description" id="infoDesc">Click on any component button below or click on 3D model regions to zoom in with precision view angles.</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Details Dictionary
+    const componentDetails = {
+  engine: { 
+    title: "Engine", 
+    icon: "⚙", 
+    desc: "The aircraft's primary propulsion system, typically designed as a high-bypass turbofan engine. It operates by intaking massive volumes of ambient air through the front fan blades. A portion of this air enters the core compressor, where high-pressure stages compress it before it is mixed with atomized aviation fuel inside the combustion chamber. The resulting high-temperature expansion drives the turbine blades—which keep the front fan spinning—and expels exhaust gases out the rear nozzle at extreme speeds. According to Newton's third law of motion, this high-velocity thrust accelerates the entire aircraft forward, generating the requisite air velocity across the airfoils to achieve sustained flight." 
+  },
+  wing: { 
+    title: "Wings", 
+    icon: "🛩", 
+    desc: "The primary aerodynamic lift-generating structures of the aircraft, engineered using precise airfoil cross-sectional geometries. As the aircraft moves forward, air splits at the wing's leading edge, flowing over the curved upper surface faster than the flatter lower surface. According to Bernoulli's principle and momentum deflection (Newton's laws), this speed variation creates a low-pressure zone above the wing, producing net upward lift to support the plane's gross weight. Structurally, wings house internal fuel bladders and feature articulated control surfaces, including trailing-edge flaps and slats for high-lift low-speed maneuvers, as well as high-speed roll-control ailerons." 
+  },
+  cockpit: { 
+    title: "Cockpit", 
+    icon: "🪟", 
+    desc: "The central flight operations and command bridge situated at the front of the fuselage. Designed around ergonomic pilot interactions, it houses the primary flight display (PFD) suites, multi-function displays (MFDs), engine-indicating and crew-alerting systems (EICAS), and flight management computers (FMC). Pilots control the aircraft through direct side-sticks or yokes paired with rudder pedals, which transmit electronic flight signals via digital Fly-By-Wire (FBW) architectures to the flight control actuators. The cockpit is enclosed by high-impact, multi-layered pressurized windshields and integrated with environmental control systems to protect the flight crew." 
+  },
+  landing: { 
+    title: "Landing Gear", 
+    icon: "🛞", 
+    desc: "The critical undercarriage structural assembly designed to support the aircraft's full operational weight while on the ground. Comprising a nose gear assembly and main gear bogies, it utilizes high-strength forged steel or titanium struts equipped with oleo-pneumatic nitrogen/oil shock absorbers to dissipate extreme impact energies during touchdown. The assembly incorporates multi-disc carbon hydraulic brakes, anti-skid braking algorithms (ABS), and directional nose-wheel steering actuators. During cruise, electro-hydraulic actuators retract the gear into dedicated fuselage or wing bays, sealing them behind aerodynamic doors to reduce parasitic drag." 
+  },
+  tail: { 
+    title: "Tail (Empennage)", 
+    icon: "📐", 
+    desc: "The complete rear stabilization and control assembly responsible for maintaining directional and longitudinal flight stability. It consists of the vertical stabilizer (fin) and the horizontal stabilizer. The vertical fin prevents lateral yaw movement and features a hinged rear rudder for heading corrections. The horizontal stabilizer maintains pitch equilibrium, counteracting wing pitching moments with hinged elevators to control up-and-down nose pitch attitude. Advanced airliners feature trimmable horizontal stabilizers (THS) driven by jackscrews to trim out aerodynamic control forces continuously throughout different flight phases." 
+  }
+};
+
+    // 2. Scene & Renderer Initialization
+    const container = document.getElementById('canvas-container');
+    const scene = new THREE.Scene();
+
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    const initialCamPos = new THREE.Vector3(12, 6, 16);
+    camera.position.copy(initialCamPos);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    container.appendChild(renderer.domElement);
+
+    const controls = new THREE.OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+
+    // 3. Lighting
+    scene.add(new THREE.AmbientLight(0xffffff, 1.2));
+    const dirLight = new THREE.DirectionalLight(0x00d2ff, 1.5);
+    dirLight.position.set(10, 20, 10);
+    scene.add(dirLight);
+
+    // 4. Load GLTF Model
+    let airplaneModel;
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(
+      'AirbusAnnotated.glb',
+      (gltf) => {
+        airplaneModel = gltf.scene;
+        scene.add(airplaneModel);
+
+        const box = new THREE.Box3().setFromObject(airplaneModel);
+        const center = box.getCenter(new THREE.Vector3());
+        airplaneModel.position.sub(center);
+      },
+      undefined,
+      (error) => {
+        console.warn('Local airplane.glb file not found. Rendering fallback model.');
+        createFallbackPlane();
+      }
+    );
+
+    // Fallback 3D plane structure
+    function createFallbackPlane() {
+      const group = new THREE.Group();
+
+      const bodyMat = new THREE.MeshStandardMaterial({ color: 0xdddddd });
+      const body = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 8, 32), bodyMat);
+      body.rotation.z = Math.PI / 2;
+      body.name = "fuselage";
+
+      const wingMat = new THREE.MeshStandardMaterial({ color: 0x00d2ff });
+      const wings = new THREE.Mesh(new THREE.BoxGeometry(2.5, 0.1, 10), wingMat);
+      wings.name = "wing";
+
+      const engMat = new THREE.MeshStandardMaterial({ color: 0x333333 });
+      const engLeft = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2, 16), engMat);
+      engLeft.rotation.z = Math.PI / 2;
+      engLeft.position.set(0, -0.8, 2.5);
+      engLeft.name = "engine";
+
+      const engRight = engLeft.clone();
+      engRight.position.set(0, -0.8, -2.5);
+      engRight.name = "engine";
+
+      group.add(body, wings, engLeft, engRight);
+      airplaneModel = group;
+      scene.add(airplaneModel);
+    }
+
+    // 5. Dynamic Camera Focus Logic (Empties or Fallback Mesh Position)
+    function focusComponent(name) {
+      if (!airplaneModel) return;
+
+      // Update UI Text
+      const data = componentDetails[name];
+      if (data) {
+        document.getElementById('infoTitle').innerText = data.title;
+        document.getElementById('infoIcon').innerText = data.icon;
+        document.getElementById('infoDesc').innerText = data.desc;
+      }
+
+      // Update Active Button Highlight
+      document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+      const activeChip = document.getElementById(`chip-${name}`);
+      if (activeChip) activeChip.classList.add('active');
+
+      // Check for Blender empty annotations (e.g., engine_target & engine_camera)
+      const targetObj = airplaneModel.getObjectByName(`${name}_target`);
+      const cameraObj = airplaneModel.getObjectByName(`${name}_camera`);
+
+      if (targetObj && cameraObj) {
+        const targetPos = new THREE.Vector3();
+        const cameraPos = new THREE.Vector3();
+        targetObj.getWorldPosition(targetPos);
+        cameraObj.getWorldPosition(cameraPos);
+
+        gsap.to(controls.target, { x: targetPos.x, y: targetPos.y, z: targetPos.z, duration: 1.6, ease: "power2.inOut" });
+        gsap.to(camera.position, { x: cameraPos.x, y: cameraPos.y, z: cameraPos.z, duration: 1.6, ease: "power2.inOut" });
+      } else {
+        // Fallback: Focus directly on named Mesh object center
+        const partMesh = airplaneModel.getObjectByName(name);
+        if (partMesh) {
+          const meshPos = new THREE.Vector3();
+          partMesh.getWorldPosition(meshPos);
+
+          gsap.to(controls.target, { x: meshPos.x, y: meshPos.y, z: meshPos.z, duration: 1.6, ease: "power2.inOut" });
+          gsap.to(camera.position, { x: meshPos.x + 4, y: meshPos.y + 3, z: meshPos.z + 5, duration: 1.6, ease: "power2.inOut" });
+        }
+      }
+    }
+
+    // 6. Reset & Zoom Controls
+    function resetCamera() {
+      gsap.to(controls.target, { x: 0, y: 0, z: 0, duration: 1.5, ease: "power2.inOut" });
+      gsap.to(camera.position, { x: initialCamPos.x, y: initialCamPos.y, z: initialCamPos.z, duration: 1.5, ease: "power2.inOut" });
+    }
+
+    function zoom(factor) {
+      camera.position.multiplyScalar(factor);
+    }
+
+    // 7. Render Loop
+    window.addEventListener('resize', () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+  </script>
+</body>
+</html>
