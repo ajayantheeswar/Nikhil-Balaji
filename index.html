@@ -156,8 +156,6 @@
     <div class="logo">✈ AEROVISTA 3D</div>
     <nav>
       <a href="#" class="active">Home</a>
-      <a href="#">Explore</a>
-      <a href="#">Learn</a>
     </nav>
   </header>
 
@@ -190,6 +188,7 @@
           <div class="audio-toolbar">
             <select class="language-select" id="languageSelect" aria-label="Description language">
               <option value="en-US">English</option>
+              <option value="ta-IN">தமிழ்</option>
             </select>
             <button class="audio-button" id="playAudioButton" type="button" onclick="toggleDescriptionAudio()" aria-pressed="false">
               ▶ Play description
@@ -199,42 +198,49 @@
             </button>
           </div>
           <p class="audio-status" id="audioStatus" role="status" aria-live="polite"></p>
+          <audio id="descriptionAudio" preload="auto"></audio>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="audio/manifest.js"></script>
   <script>
     // 1. Details Dictionary
     const componentDetails = {
       engine: {
         icon: "⚙",
         translations: {
-          en: { title: "Engine", desc: "The aircraft's primary propulsion system, typically designed as a high-bypass turbofan engine. It operates by intaking massive volumes of ambient air through the front fan blades. A portion of this air enters the core compressor, where high-pressure stages compress it before it is mixed with atomized aviation fuel inside the combustion chamber. The resulting high-temperature expansion drives the turbine blades—which keep the front fan spinning—and expels exhaust gases out the rear nozzle at extreme speeds. According to Newton's third law of motion, this high-velocity thrust accelerates the entire aircraft forward, generating the requisite air velocity across the airfoils to achieve sustained flight." }
+          en: { title: "Engine", label: "ENGINE", desc: "The aircraft's primary propulsion system, typically designed as a high-bypass turbofan engine. It operates by intaking massive volumes of ambient air through the front fan blades. A portion of this air enters the core compressor, where high-pressure stages compress it before it is mixed with atomized aviation fuel inside the combustion chamber. The resulting high-temperature expansion drives the turbine blades—which keep the front fan spinning—and expels exhaust gases out the rear nozzle at extreme speeds. According to Newton's third law of motion, this high-velocity thrust accelerates the entire aircraft forward, generating the requisite air velocity across the airfoils to achieve sustained flight." },
+          ta: { title: "இயந்திரம்", label: "இயந்திரம்", desc: "விமானத்தின் முக்கிய உந்துவிசை அமைப்பான இது பொதுவாக அதிக பைபாஸ் டர்போஃபேன் இயந்திரமாக வடிவமைக்கப்படுகிறது. முன்புற விசிறி வழியாக அதிக அளவு காற்றை உள்வாங்கி, அதன் ஒரு பகுதியை உயர் அழுத்தக் கம்பிரசரில் அழுத்துகிறது. பின்னர் அது எரிப்பு அறையில் நுண்ணிய விமான எரிபொருளுடன் கலக்கப்படுகிறது. உருவாகும் அதிக வெப்ப விரிவாக்கம் டர்பைன் விசிறிகளைச் சுழற்றி, பின்புற முனை வழியாக வேகமாக வெளியேறும் வாயுக்களால் விமானத்தை முன்னோக்கி இயக்குகிறது." }
         }
       },
       wing: {
         icon: "🛩",
         translations: {
-          en: { title: "Wings", desc: "The primary aerodynamic lift-generating structures of the aircraft, engineered using precise airfoil cross-sectional geometries. As the aircraft moves forward, air splits at the wing's leading edge, flowing over the curved upper surface faster than the flatter lower surface. According to Bernoulli's principle and momentum deflection (Newton's laws), this speed variation creates a low-pressure zone above the wing, producing net upward lift to support the plane's gross weight. Structurally, wings house internal fuel bladders and feature articulated control surfaces, including trailing-edge flaps and slats for high-lift low-speed maneuvers, as well as high-speed roll-control ailerons." }
+          en: { title: "Wings", label: "WINGS", desc: "The primary aerodynamic lift-generating structures of the aircraft, engineered using precise airfoil cross-sectional geometries. As the aircraft moves forward, air splits at the wing's leading edge, flowing over the curved upper surface faster than the flatter lower surface. According to Bernoulli's principle and momentum deflection (Newton's laws), this speed variation creates a low-pressure zone above the wing, producing net upward lift to support the plane's gross weight. Structurally, wings house internal fuel bladders and feature articulated control surfaces, including trailing-edge flaps and slats for high-lift low-speed maneuvers, as well as high-speed roll-control ailerons." },
+          ta: { title: "இறக்கைகள்", label: "இறக்கைகள்", desc: "விமானத்திற்கு மேலெழுச்சி விசையை உருவாக்கும் முக்கிய காற்றியக்க அமைப்புகள் இறக்கைகள் ஆகும். முன்புற விளிம்பில் காற்று பிரிந்து, வளைந்த மேற்பரப்பின் மீது கீழ்ப்புறத்தை விட வேகமாகப் பாய்கிறது. இந்த வேறுபாடு இறக்கையின் மேல் குறைந்த அழுத்தத்தை உருவாக்கி, விமானத்தின் எடையைத் தாங்கும் மேல்நோக்கிய விசையை ஏற்படுத்துகிறது. இறக்கைகளுக்குள் எரிபொருள் தொட்டிகளும், குறைந்த வேகத்தில் மேலெழுச்சியை அதிகரிக்கும் ஃப்ளாப்கள் மற்றும் ஸ்லாட்டுகளும், சுழற்சியைக் கட்டுப்படுத்தும் ஏலிரான்களும் உள்ளன." }
         }
       },
       cockpit: {
         icon: "🪟",
         translations: {
-          en: { title: "Cockpit", desc: "The central flight operations and command bridge situated at the front of the fuselage. Designed around ergonomic pilot interactions, it houses the primary flight display (PFD) suites, multi-function displays (MFDs), engine-indicating and crew-alerting systems (EICAS), and flight management computers (FMC). Pilots control the aircraft through direct side-sticks or yokes paired with rudder pedals, which transmit electronic flight signals via digital Fly-By-Wire (FBW) architectures to the flight control actuators. The cockpit is enclosed by high-impact, multi-layered pressurized windshields and integrated with environmental control systems to protect the flight crew." }
+          en: { title: "Cockpit", label: "COCKPIT", desc: "The central flight operations and command bridge situated at the front of the fuselage. Designed around ergonomic pilot interactions, it houses the primary flight display (PFD) suites, multi-function displays (MFDs), engine-indicating and crew-alerting systems (EICAS), and flight management computers (FMC). Pilots control the aircraft through direct side-sticks or yokes paired with rudder pedals, which transmit electronic flight signals via digital Fly-By-Wire (FBW) architectures to the flight control actuators. The cockpit is enclosed by high-impact, multi-layered pressurized windshields and integrated with environmental control systems to protect the flight crew." },
+          ta: { title: "விமானி அறை", label: "விமானி அறை", desc: "விமான உடலின் முன்பகுதியில் அமைந்துள்ள விமான இயக்கம் மற்றும் கட்டுப்பாட்டின் மையம் விமானி அறை ஆகும். இதில் முதன்மை விமானக் காட்சிகள், பல்நோக்கு காட்சிகள், இயந்திரக் கண்காணிப்பு மற்றும் எச்சரிக்கை அமைப்புகள், விமான மேலாண்மை கணினிகள் ஆகியவை உள்ளன. பக்கக் கட்டுப்பாட்டு கம்பிகள் அல்லது யோக்குகள் மற்றும் கால் பெடல்கள் மூலம் விமானிகள் விமானக் கட்டுப்பாட்டு இயக்கிகளை மின்னணு ஃப்ளை-பை-வைர் அமைப்பின் வழியாக இயக்குகின்றனர்." }
         }
       },
       landing: {
         icon: "🛞",
         translations: {
-          en: { title: "Landing Gear", desc: "The critical undercarriage structural assembly designed to support the aircraft's full operational weight while on the ground. Comprising a nose gear assembly and main gear bogies, it utilizes high-strength forged steel or titanium struts equipped with oleo-pneumatic nitrogen/oil shock absorbers to dissipate extreme impact energies during touchdown. The assembly incorporates multi-disc carbon hydraulic brakes, anti-skid braking algorithms (ABS), and directional nose-wheel steering actuators. During cruise, electro-hydraulic actuators retract the gear into dedicated fuselage or wing bays, sealing them behind aerodynamic doors to reduce parasitic drag." }
+          en: { title: "Landing Gear", label: "Landing Gear", desc: "The critical undercarriage structural assembly designed to support the aircraft's full operational weight while on the ground. Comprising a nose gear assembly and main gear bogies, it utilizes high-strength forged steel or titanium struts equipped with oleo-pneumatic nitrogen/oil shock absorbers to dissipate extreme impact energies during touchdown. The assembly incorporates multi-disc carbon hydraulic brakes, anti-skid braking algorithms (ABS), and directional nose-wheel steering actuators. During cruise, electro-hydraulic actuators retract the gear into dedicated fuselage or wing bays, sealing them behind aerodynamic doors to reduce parasitic drag." },
+          ta: { title: "தரையிறங்கும் சக்கர அமைப்பு", label: "தரையிறங்கும் சக்கர அமைப்பு", desc: "தரையில் இருக்கும் போது விமானத்தின் முழு செயல்பாட்டு எடையையும் தாங்கும் முக்கிய கீழமைப்பு தரையிறங்கும் சக்கர அமைப்பாகும். இதில் முன்சக்கர அமைப்பும் பிரதான சக்கரத் தொகுதிகளும் உள்ளன. நைட்ரஜன் மற்றும் எண்ணெய் அதிர்வு உறிஞ்சிகள் தரையிறங்கும் போது ஏற்படும் அதிர்ச்சியை குறைக்கின்றன. கார்பன் ஹைட்ராலிக் பிரேக்குகள், சறுக்கல் தடுப்பு கட்டுப்பாடு மற்றும் திசைமாற்றும் முன்சக்கர இயக்கிகள் இதில் அடங்கும்." }
         }
       },
       tail: {
         icon: "📐",
         translations: {
-          en: { title: "Tail (Empennage)", desc: "The complete rear stabilization and control assembly responsible for maintaining directional and longitudinal flight stability. It consists of the vertical stabilizer (fin) and the horizontal stabilizer. The vertical fin prevents lateral yaw movement and features a hinged rear rudder for heading corrections. The horizontal stabilizer maintains pitch equilibrium, counteracting wing pitching moments with hinged elevators to control up-and-down nose pitch attitude. Advanced airliners feature trimmable horizontal stabilizers (THS) driven by jackscrews to trim out aerodynamic control forces continuously throughout different flight phases." }
+          en: { title: "Tail (Empennage)", label: "Tail", desc: "The complete rear stabilization and control assembly responsible for maintaining directional and longitudinal flight stability. It consists of the vertical stabilizer (fin) and the horizontal stabilizer. The vertical fin prevents lateral yaw movement and features a hinged rear rudder for heading corrections. The horizontal stabilizer maintains pitch equilibrium, counteracting wing pitching moments with hinged elevators to control up-and-down nose pitch attitude. Advanced airliners feature trimmable horizontal stabilizers (THS) driven by jackscrews to trim out aerodynamic control forces continuously throughout different flight phases." },
+          ta: { title: "வால் அமைப்பு", label: "வால் அமைப்பு", desc: "விமானத்தின் திசை மற்றும் நீளநிலை நிலைத்தன்மையை பராமரிக்கும் பின்புற கட்டுப்பாட்டு அமைப்பு வால் அமைப்பாகும். இதில் செங்குத்து நிலைப்படுத்தியும் கிடைமட்ட நிலைப்படுத்தியும் உள்ளன. செங்குத்து துடுப்பு பக்கவாட்டு சுழற்சியைத் தடுத்து, பின்புற ரட்டர் மூலம் திசை மாற்றங்களைச் செய்கிறது. கிடைமட்ட நிலைப்படுத்தி விமானத்தின் முனை மேலே அல்லது கீழே சாய்வதை உயர்த்திகளின் மூலம் கட்டுப்படுத்துகிறது." }
         }
       }
     };
@@ -242,7 +248,8 @@
     const defaultDetails = {
       icon: "✈",
       translations: {
-        en: { title: "Aircraft Explorer", desc: "Click on any component button below or click on 3D model regions to zoom in with precision view angles." }
+        en: { title: "Aircraft Explorer", desc: "Click on any component button below or click on 3D model regions to zoom in with precision view angles." },
+        ta: { title: "விமான ஆய்வாளர்", desc: "கீழே உள்ள எந்தக் கூறு பொத்தானையும் அல்லது 3D மாதிரியின் பகுதியையும் கிளிக் செய்து, துல்லியமான பார்வைக் கோணத்தில் பெரிதாக்கிப் பார்க்கவும்." }
       }
     };
     let selectedComponent = null;
@@ -250,11 +257,31 @@
     let selectedLanguage = 'en-US';
     let speechChunks = [];
     let speechChunkIndex = 0;
+    let speechSessionId = 0;
+    let isDescriptionPlaying = false;
+    let audioChunkIndex = 0;
+    const descriptionAudio = document.getElementById('descriptionAudio');
 
     function getSelectedDetails() {
       const details = componentDetails[selectedComponent] || defaultDetails;
       const language = selectedLanguage.split('-')[0];
       return { ...details, ...details.translations[language] || details.translations.en };
+    }
+
+    function updateComponentLabels() {
+      const language = selectedLanguage.split('-')[0];
+      Object.entries(componentDetails).forEach(([name, details]) => {
+        const translation = details.translations[language] || details.translations.en;
+        const chip = document.getElementById(`chip-${name}`);
+        if (chip) chip.innerText = `${details.icon} ${translation.label}`;
+      });
+    }
+
+    function updateInfoPanel() {
+      const data = getSelectedDetails();
+      document.getElementById('infoTitle').innerText = data.title;
+      document.getElementById('infoIcon').innerText = data.icon;
+      document.getElementById('infoDesc').innerText = data.desc;
     }
 
     function updateAudioControls() {
@@ -263,62 +290,159 @@
       muteButton.setAttribute('aria-pressed', String(audioMuted));
     }
 
-    function toggleDescriptionAudio() {
+    function getSpeechChunks(text) {
+      const sentences = text.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [text];
+      const chunks = [];
+
+      sentences.forEach((sentence) => {
+        let remaining = sentence.trim();
+        while (remaining.length > 240) {
+          const splitAt = Math.max(
+            remaining.lastIndexOf(', ', 240),
+            remaining.lastIndexOf('; ', 240),
+            remaining.lastIndexOf(' ', 240)
+          );
+          const splitIndex = splitAt > 60 ? splitAt : 240;
+          chunks.push(remaining.slice(0, splitIndex).trim());
+          remaining = remaining.slice(splitIndex).trim();
+        }
+        if (remaining) chunks.push(remaining);
+      });
+
+      return chunks;
+    }
+
+    function getPreferredSpeechVoice(voices) {
+      const language = selectedLanguage.toLowerCase();
+      const languagePrefix = language.split('-')[0];
+      const naturalVoicePattern = /natural|neural|premium|enhanced|google|microsoft|samantha|ava|karen|daniel|moira|lekha|rishi/i;
+      return voices.find((voice) => voice.lang.toLowerCase() === language && voice.localService)
+        || voices.find((voice) => voice.lang.toLowerCase() === language && naturalVoicePattern.test(voice.name))
+        || voices.find((voice) => voice.lang.toLowerCase() === language)
+        || voices.find((voice) => voice.lang.toLowerCase().startsWith(languagePrefix) && voice.localService)
+        || voices.find((voice) => voice.lang.toLowerCase().startsWith(languagePrefix) && naturalVoicePattern.test(voice.name))
+        || voices.find((voice) => voice.lang.toLowerCase().startsWith(languagePrefix))
+        || voices[0];
+    }
+
+    function stopDescriptionAudio(statusText = '') {
+      speechSessionId += 1;
+      speechChunks = [];
+      speechChunkIndex = 0;
+      audioChunkIndex = 0;
+      isDescriptionPlaying = false;
+      descriptionAudio.pause();
+      descriptionAudio.removeAttribute('src');
+      if ('speechSynthesis' in window) {
+        speechSynthesis.cancel();
+      }
+      document.getElementById('playAudioButton').innerText = '▶ Play description';
+      document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
+      document.getElementById('audioStatus').innerText = statusText;
+    }
+
+    function getLocalAudioFiles() {
+      const component = selectedComponent || 'default';
+      const language = selectedLanguage.split('-')[0];
+      return (window.descriptionAudioManifest || {})[`${component}-${language}`] || [];
+    }
+
+    function startSpeechDescription() {
       if (!('speechSynthesis' in window)) {
-        document.getElementById('audioStatus').innerText = 'Audio playback is not supported in this browser.';
+        document.getElementById('audioStatus').innerText = 'This browser cannot play the saved audio or synthesize speech.';
         return;
       }
-      if (speechSynthesis.speaking) {
-        speechSynthesis.cancel();
-        document.getElementById('playAudioButton').innerText = '▶ Play description';
-        document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
-        document.getElementById('audioStatus').innerText = 'Playback stopped.';
+      const voices = speechSynthesis.getVoices();
+      if (!voices.length) {
+        document.getElementById('audioStatus').innerText = 'No speech voice is available and the saved audio could not be played.';
+        return;
+      }
+      speechChunks = getSpeechChunks(getSelectedDetails().desc);
+      speechChunkIndex = 0;
+      isDescriptionPlaying = true;
+      speechSessionId += 1;
+      speakNextDescriptionChunk(speechSessionId);
+    }
+
+    function playNextLocalAudio(sessionId, files) {
+      if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
+      if (audioChunkIndex >= files.length) {
+        stopDescriptionAudio('Description complete.');
+        return;
+      }
+      descriptionAudio.src = files[audioChunkIndex];
+      descriptionAudio.onended = () => {
+        if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
+        audioChunkIndex += 1;
+        playNextLocalAudio(sessionId, files);
+      };
+      descriptionAudio.onerror = () => {
+        stopDescriptionAudio();
+        startSpeechDescription();
+      };
+      descriptionAudio.play().then(() => {
+        if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
+        document.getElementById('playAudioButton').innerText = '■ Stop description';
+        document.getElementById('playAudioButton').setAttribute('aria-pressed', 'true');
+        document.getElementById('audioStatus').innerText = 'Playing saved description audio...';
+      }).catch(() => {
+        stopDescriptionAudio();
+        startSpeechDescription();
+      });
+    }
+
+    function toggleDescriptionAudio() {
+      if (isDescriptionPlaying) {
+        stopDescriptionAudio('Playback stopped.');
         return;
       }
       if (audioMuted) {
         document.getElementById('audioStatus').innerText = 'Sound is muted. Turn sound on to play the description.';
         return;
       }
-      const voices = speechSynthesis.getVoices();
-      if (!voices.length) {
-        document.getElementById('audioStatus').innerText = 'No speech voice is available. Install or enable an English voice in your browser or device settings.';
-        return;
+      isDescriptionPlaying = true;
+      speechSessionId += 1;
+      audioChunkIndex = 0;
+      const files = getLocalAudioFiles();
+      if (files.length) {
+        playNextLocalAudio(speechSessionId, files);
+      } else {
+        startSpeechDescription();
       }
-
-      speechChunks = getSelectedDetails().desc.match(/[^.!?]+[.!?]+|[^.!?]+$/g) || [getSelectedDetails().desc];
-      speechChunkIndex = 0;
-      speakNextDescriptionChunk();
     }
 
-    function speakNextDescriptionChunk() {
+    function speakNextDescriptionChunk(sessionId) {
+      if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
       if (speechChunkIndex >= speechChunks.length) {
-        document.getElementById('playAudioButton').innerText = '▶ Play description';
-        document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
-        document.getElementById('audioStatus').innerText = 'Description complete.';
+        stopDescriptionAudio('Description complete.');
         return;
       }
-      const speech = new SpeechSynthesisUtterance(getSelectedDetails().desc);
-      speech.text = speechChunks[speechChunkIndex];
+      const speech = new SpeechSynthesisUtterance(speechChunks[speechChunkIndex]);
       speech.lang = selectedLanguage;
       const voices = speechSynthesis.getVoices();
-      speech.voice = voices.find((voice) => voice.lang.toLowerCase() === selectedLanguage.toLowerCase())
-        || voices.find((voice) => voice.lang.toLowerCase().startsWith(selectedLanguage.split('-')[0].toLowerCase()))
-        || voices[0];
+      speech.voice = getPreferredSpeechVoice(voices);
+      speech.rate = 0.78;
+      speech.pitch = selectedLanguage === 'ta-IN' ? 1.02 : 0.98;
+      speech.volume = 1;
       speech.onstart = () => {
+        if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
         document.getElementById('playAudioButton').innerText = '■ Stop description';
         document.getElementById('playAudioButton').setAttribute('aria-pressed', 'true');
         document.getElementById('audioStatus').innerText = 'Reading description...';
       };
       speech.onend = () => {
+        if (sessionId !== speechSessionId || !isDescriptionPlaying) return;
         speechChunkIndex += 1;
-        speakNextDescriptionChunk();
+        speakNextDescriptionChunk(sessionId);
       };
       speech.onerror = (event) => {
+        if (sessionId !== speechSessionId) return;
+        isDescriptionPlaying = false;
         document.getElementById('playAudioButton').innerText = '▶ Play description';
         document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
         document.getElementById('audioStatus').innerText = event.error === 'canceled'
           ? 'Playback stopped.'
-          : 'Unable to play this description. Check that an English speech voice is enabled on your device.';
+          : 'Unable to play this description. Check that a speech voice is enabled on your device.';
       };
       speechSynthesis.speak(speech);
     }
@@ -326,28 +450,21 @@
     function toggleAudioMute() {
       audioMuted = !audioMuted;
       localStorage.setItem('aerovista-audio-muted', String(audioMuted));
-      if (audioMuted && 'speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        speechChunks = [];
-      }
+      if (audioMuted) stopDescriptionAudio();
       updateAudioControls();
       document.getElementById('audioStatus').innerText = audioMuted ? 'Audio muted.' : 'Audio unmuted.';
-      document.getElementById('playAudioButton').innerText = '▶ Play description';
-      document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
     }
 
     document.getElementById('languageSelect').addEventListener('change', (event) => {
       selectedLanguage = event.target.value;
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        speechChunks = [];
-      }
+      updateComponentLabels();
+      updateInfoPanel();
+      stopDescriptionAudio();
       document.getElementById('audioStatus').innerText = 'Language updated.';
     });
-    if ('speechSynthesis' in window) {
-      speechSynthesis.addEventListener('voiceschanged', () => speechSynthesis.getVoices());
-    }
     updateAudioControls();
+    updateComponentLabels();
+    updateInfoPanel();
 
     // 2. Scene & Renderer Initialization
     const container = document.getElementById('canvas-container');
@@ -427,17 +544,8 @@
 
       // Update UI Text
       selectedComponent = name;
-      const data = getSelectedDetails();
-      document.getElementById('infoTitle').innerText = data.title;
-      document.getElementById('infoIcon').innerText = data.icon;
-      document.getElementById('infoDesc').innerText = data.desc;
-      if ('speechSynthesis' in window) {
-        speechSynthesis.cancel();
-        speechChunks = [];
-      }
-      document.getElementById('playAudioButton').innerText = '▶ Play description';
-      document.getElementById('playAudioButton').setAttribute('aria-pressed', 'false');
-      document.getElementById('audioStatus').innerText = '';
+      updateInfoPanel();
+      stopDescriptionAudio();
 
       // Update Active Button Highlight
       document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
